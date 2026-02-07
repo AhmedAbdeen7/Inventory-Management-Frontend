@@ -1,0 +1,73 @@
+{
+    "summary": {
+        "itemsToOrder": 5,
+        "estimatedCost": "DKK 5.730",
+        "budgetMode": false
+    },
+    "urgencySummary": {
+        "critical": 1,
+        "high": 2
+    },
+    "items": [
+        {
+            "id": 1,
+            "priority": 1,
+            "item": "Tomatoes",
+            "estimatedCost": "DKK 960",
+            "onHand": 20,
+            "usagePerDay": 12,
+            "leadTime": "2d",
+            "orderBy": "2026-02-06",
+            "daysLeft": 1.7,
+            "urgency": "critical"
+        },
+        {
+            "id": 2,
+            "priority": 2,
+            "item": "Mozzarella",
+            "estimatedCost": "DKK 1,600",
+            "onHand": 15,
+            "usagePerDay": 6,
+            "leadTime": "2d",
+            "orderBy": "2026-02-07",
+            "daysLeft": 2.5,
+            "urgency": "high"
+        },
+        {
+            "id": 3,
+            "priority": 3,
+            "item": "Chicken Breast",
+            "estimatedCost": "DKK 1,350",
+            "onHand": 40,
+            "usagePerDay": 8,
+            "leadTime": "3d",
+            "orderBy": "2026-02-09",
+            "daysLeft": 5.0,
+            "urgency": "high"
+        },
+        {
+            "id": 4,
+            "priority": 4,
+            "item": "Basil (fresh)",
+            "estimatedCost": "DKK 450",
+            "onHand": 25,
+            "usagePerDay": 4,
+            "leadTime": "1d",
+            "orderBy": "2026-02-11",
+            "daysLeft": 6.25,
+            "urgency": "medium"
+        },
+        {
+            "id": 5,
+            "priority": 5,
+            "item": "Bread Rolls",
+            "estimatedCost": "DKK 375",
+            "onHand": 80,
+            "usagePerDay": 15,
+            "leadTime": "1d",
+            "orderBy": "2026-02-10",
+            "daysLeft": 5.3,
+            "urgency": "low"
+        }
+    ]
+}

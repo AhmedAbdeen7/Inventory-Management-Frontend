@@ -1,0 +1,54 @@
+{
+    "alerts": [
+        {
+            "id": 1,
+            "item": "Tomatoes",
+            "severity": "critical",
+            "title": "Stockout expected in 1 day",
+            "description": "Current stock: 20 units.",
+            "dailyUsage": 12,
+            "leadTime": 2,
+            "action": "Reorder immediately.",
+            "timestamp": "2026-02-07T07:30:00Z"
+        },
+        {
+            "id": 2,
+            "item": "Mozzarella",
+            "severity": "high",
+            "title": "Below reorder point",
+            "description": "2.5 days of stock remaining.",
+            "dailyUsage": 6,
+            "leadTime": 2,
+            "action": "Order by tomorrow.",
+            "timestamp": "2026-02-07T06:45:00Z"
+        },
+        {
+            "id": 3,
+            "item": "Chicken Breast",
+            "severity": "high",
+            "title": "Below reorder point",
+            "description": "5 days of stock remaining.",
+            "dailyUsage": 8,
+            "leadTime": 3,
+            "action": "Order within 2 days.",
+            "timestamp": "2026-02-07T06:30:00Z"
+        },
+        {
+            "id": 4,
+            "item": "Basil (fresh)",
+            "severity": "medium",
+            "title": "Approaching reorder point",
+            "description": "Stock at 60% of target.",
+            "dailyUsage": 4,
+            "leadTime": 1,
+            "action": "Monitor closely.",
+            "timestamp": "2026-02-07T05:00:00Z"
+        }
+    ],
+    "summary": {
+        "critical": 1,
+        "high": 2,
+        "medium": 1,
+        "total": 4
+    }
+}
