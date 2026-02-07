@@ -1,0 +1,218 @@
+{
+  "kpis": {
+    "savings": "DKK 12,340",
+    "savingsDelta": "+8.2%",
+    "savingsTrend": [
+      {
+        "value": 9200
+      },
+      {
+        "value": 9800
+      },
+      {
+        "value": 10500
+      },
+      {
+        "value": 11200
+      },
+      {
+        "value": 11800
+      },
+      {
+        "value": 12340
+      }
+    ],
+    "wastePercent": "4.2%",
+    "wasteDelta": "-1.5%",
+    "wasteTrend": [
+      {
+        "value": 6.8
+      },
+      {
+        "value": 5.9
+      },
+      {
+        "value": 5.4
+      },
+      {
+        "value": 5.0
+      },
+      {
+        "value": 4.6
+      },
+      {
+        "value": 4.2
+      }
+    ],
+    "stockoutRisks": 3,
+    "stockoutDelta": "+1",
+    "stockoutTrend": [
+      {
+        "value": 1
+      },
+      {
+        "value": 2
+      },
+      {
+        "value": 1
+      },
+      {
+        "value": 2
+      },
+      {
+        "value": 2
+      },
+      {
+        "value": 3
+      }
+    ],
+    "recommendedOrderValue": "DKK 8,750",
+    "ordersTrend": [
+      {
+        "value": 7200
+      },
+      {
+        "value": 6800
+      },
+      {
+        "value": 7500
+      },
+      {
+        "value": 8100
+      },
+      {
+        "value": 8400
+      },
+      {
+        "value": 8750
+      }
+    ]
+  },
+  "alertsSummary": {
+    "critical": 1,
+    "high": 2,
+    "medium": 1,
+    "total": 4
+  },
+  "demandTrend": [
+    {
+      "date": "Jan 27",
+      "actual": 92,
+      "predicted": 115
+    },
+    {
+      "date": "Jan 28",
+      "actual": 140,
+      "predicted": 125
+    },
+    {
+      "date": "Jan 29",
+      "actual": 110,
+      "predicted": 120
+    },
+    {
+      "date": "Jan 30",
+      "actual": 95,
+      "predicted": 130
+    },
+    {
+      "date": "Jan 31",
+      "actual": 145,
+      "predicted": 145
+    },
+    {
+      "date": "Feb 01",
+      "actual": 155,
+      "predicted": 155
+    },
+    {
+      "date": "Feb 02",
+      "actual": 160,
+      "predicted": 165
+    },
+    {
+      "date": "Feb 03",
+      "actual": 170,
+      "predicted": 160
+    },
+    {
+      "date": "Feb 04",
+      "actual": 165,
+      "predicted": 155
+    },
+    {
+      "date": "Feb 05",
+      "actual": null,
+      "predicted": 150
+    }
+  ],
+  "wasteByItem": [
+    {
+      "name": "Tomatoes",
+      "waste": 2400
+    },
+    {
+      "name": "Lettuce",
+      "waste": 1800
+    },
+    {
+      "name": "Bread Rolls",
+      "waste": 1500
+    },
+    {
+      "name": "Mozzarella",
+      "waste": 900
+    },
+    {
+      "name": "Basil",
+      "waste": 600
+    }
+  ],
+  "priorities": [
+    {
+      "id": 1,
+      "item": "Tomatoes",
+      "onHand": 20,
+      "forecast7d": 84,
+      "reorderQty": 80,
+      "urgency": "Critical",
+      "severity": "critical"
+    },
+    {
+      "id": 2,
+      "item": "Mozzarella",
+      "onHand": 15,
+      "forecast7d": 42,
+      "reorderQty": 40,
+      "urgency": "High",
+      "severity": "high"
+    },
+    {
+      "id": 3,
+      "item": "Chicken Breast",
+      "onHand": 40,
+      "forecast7d": 56,
+      "reorderQty": 30,
+      "urgency": "High",
+      "severity": "high"
+    },
+    {
+      "id": 4,
+      "item": "Olive Oil (5L)",
+      "onHand": 8,
+      "forecast7d": 4,
+      "reorderQty": null,
+      "urgency": "OK",
+      "severity": "ok"
+    },
+    {
+      "id": 5,
+      "item": "Lettuce",
+      "onHand": 60,
+      "forecast7d": 35,
+      "reorderQty": null,
+      "urgency": "OK",
+      "severity": "ok"
+    }
+  ]
+}
