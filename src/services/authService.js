@@ -1,39 +1,34 @@
 import api from './api';
 
 export const login = async (email, password) => {
-  // Demo behavior: call backend if available, otherwise simulate
-  try {
-    const { data } = await api.post('/auth/login', { email, password });
-    if (data?.token) localStorage.setItem('token', data.token);
-    return data;
-  } catch (err) {
-    // fallback demo response
-    const demo = { token: 'demo-token', user: { name: 'Demo Manager', email, role: 'manager' } };
-    localStorage.setItem('token', demo.token);
-    return demo;
+  const { data } = await api.post('/users/login', { email, password });
+  if (data?.token) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
   }
+  return data;
 };
 
-export const register = async (payload) => {
-  try {
-    const { data } = await api.post('/auth/register', payload);
-    return data;
-  } catch (err) {
-    return { success: true, message: 'Registered (demo)' };
+export const register = async (userData) => {
+  const { data } = await api.post('/users/register', userData);
+  if (data?.token) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
   }
+  return data;
 };
 
 export const logout = () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('user');
 };
 
 export const getProfile = async () => {
-  try {
-    const { data } = await api.get('/auth/me');
-    return data;
-  } catch (err) {
-    return { name: 'Demo Manager', email: 'demo@freshflow.dk', role: 'manager' };
-  }
+  // We can just get user from localStorage since login/register returns it
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  if (token && userStr) return JSON.parse(userStr);
+  return null;
 };
 
 export default { login, register, logout, getProfile };

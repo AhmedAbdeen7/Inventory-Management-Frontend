@@ -16,29 +16,39 @@ import {
   Link,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { alpha } from '@mui/material/styles';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
+
+import useAuth from '../hooks/useAuth';
 
 export default function Register() {
   const navigate = useNavigate();
-  const [role, setRole] = useState('manager');
+  const { register } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [accessKey, setAccessKey] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const isValid = firstName && lastName && email.includes('@') && phone && password.length >= 6 && (role !== 'staff' || accessKey);
+  const isValid = firstName && lastName && email.includes('@') && phone && password.length >= 6;
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (isValid) {
-      navigate('/dashboard');
+      setLoading(true);
+      setError('');
+      try {
+        await register({ firstName, lastName, email, phone: `+20${phone}`, password });
+        navigate('/');
+      } catch (err) {
+        setError(err.response?.data?.message || 'Registration failed');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -121,45 +131,14 @@ export default function Register() {
                 >
                   Fill in your details to get started with FreshFlow.
                 </Typography>
+                {error && (
+                  <Typography color="error" variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+                    {error}
+                  </Typography>
+                )}
               </Box>
 
               <Box component="form" noValidate onSubmit={handleRegister}>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="form-label" sx={{ fontSize: 14, fontWeight: 500, color: '#374151', mb: 1.5, letterSpacing: '-0.01em' }}>
-                    Select Your Role
-                  </Typography>
-                  <Stack direction="row" spacing={1}>
-                    <Chip
-                      label="Store Manager"
-                      onClick={() => setRole('manager')}
-                      sx={{
-                        flex: 1,
-                        fontWeight: 600,
-                        borderRadius: '8px',
-                        bgcolor: role === 'manager' ? '#1B5E20' : '#F9FAFB',
-                        color: role === 'manager' ? 'white' : '#374151',
-                        border: '1px solid',
-                        borderColor: role === 'manager' ? '#1B5E20' : '#E5E7EB',
-                        '&:hover': { bgcolor: role === 'manager' ? '#003300' : '#F3F4F6' }
-                      }}
-                    />
-                    <Chip
-                      label="Floor Staff"
-                      onClick={() => setRole('staff')}
-                      sx={{
-                        flex: 1,
-                        fontWeight: 600,
-                        borderRadius: '8px',
-                        bgcolor: role === 'staff' ? '#1B5E20' : '#F9FAFB',
-                        color: role === 'staff' ? 'white' : '#374151',
-                        border: '1px solid',
-                        borderColor: role === 'staff' ? '#1B5E20' : '#E5E7EB',
-                        '&:hover': { bgcolor: role === 'staff' ? '#003300' : '#F3F4F6' }
-                      }}
-                    />
-                  </Stack>
-                </Box>
-
                 <Stack spacing={2}>
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                     <Box className="form-group" sx={{ flex: 1 }}>
@@ -247,7 +226,12 @@ export default function Register() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       InputProps={{
-                        startAdornment: (<InputAdornment position="start"><PhoneOutlinedIcon fontSize="small" sx={{ color: '#9CA3AF' }} /></InputAdornment>)
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <PhoneOutlinedIcon fontSize="small" sx={{ color: '#9CA3AF', mr: 1 }} />
+                            <Typography variant="body2" sx={{ color: '#9CA3AF', fontWeight: 500 }}>+20</Typography>
+                          </InputAdornment>
+                        )
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -288,31 +272,6 @@ export default function Register() {
                       }}
                     />
                   </Box>
-
-                  <Collapse in={role === 'staff'}>
-                    <Box className="form-group">
-                      <Typography className="form-label" component="label" sx={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#374151', mb: 1, letterSpacing: '-0.01em' }}>
-                        Staff Access Key
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        value={accessKey}
-                        onChange={(e) => setAccessKey(e.target.value)}
-                        InputProps={{
-                          startAdornment: (<InputAdornment position="start"><VpnKeyOutlinedIcon fontSize="small" sx={{ color: '#9CA3AF' }} /></InputAdornment>)
-                        }}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            bgcolor: alpha('#1B5E20', 0.02),
-                            borderRadius: '8px',
-                            '& fieldset': { borderColor: '#E5E7EB' },
-                            '&.Mui-focused fieldset': { borderColor: '#1B5E20' }
-                          },
-                          '& input': { padding: '12px 16px', fontSize: 15 }
-                        }}
-                      />
-                    </Box>
-                  </Collapse>
 
                   <Button
                     type="submit"

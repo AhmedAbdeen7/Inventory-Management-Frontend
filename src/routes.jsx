@@ -32,7 +32,7 @@ export default function AppRoutes() {
       <Route path={ROUTES.ALERTS} element={<ProtectedRoute><Suspense fallback={fallback}><Alerts /></Suspense></ProtectedRoute>} />
       <Route path={ROUTES.PROMOTIONS} element={<ProtectedRoute><Suspense fallback={fallback}><Promotions /></Suspense></ProtectedRoute>} />
 
-      <Route path={ROUTES.SETTINGS} element={<ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]}><Suspense fallback={fallback}><Settings /></Suspense></ProtectedRoute>} />
+      <Route path={ROUTES.SETTINGS} element={<ProtectedRoute><Suspense fallback={fallback}><Settings /></Suspense></ProtectedRoute>} />
     </Routes>
   );
 }

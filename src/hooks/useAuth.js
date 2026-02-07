@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
 
-export default function useAuth(){
-  // Simple demo hook – returns a demo manager user
-  const [user, setUser] = useState({ name: 'Demo Manager', email: 'demo@freshflow.dk', role: 'manager' });
-  const [loading, setLoading] = useState(false);
-  useEffect(() => { setLoading(false); }, []);
-  return { user, loading };
+export default function useAuth() {
+  return useContext(AuthContext);
 }

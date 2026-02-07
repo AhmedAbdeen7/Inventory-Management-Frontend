@@ -11,6 +11,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/layout/PageWrapper';
+import useAuth from '../hooks/useAuth';
 import KPICard from '../components/ui/KPICard';
 import mockDashboard from '../mocks/dashboardData.json';
 import DemandChart from '../components/charts/DemandChart';
@@ -18,6 +19,7 @@ import WasteBarChart from '../components/charts/WasteBarChart';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { kpis, alertsSummary, demandTrend, wasteByItem, priorities } = mockDashboard;
 
   const today = new Date();
@@ -39,7 +41,7 @@ export default function Dashboard() {
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h5" fontWeight={800}>
-                Good morning, Demo 👋
+                Good morning, {user?.firstName || 'Demo'} 👋
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
                 📅 {dateStr}

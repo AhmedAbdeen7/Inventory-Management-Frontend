@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Box, Avatar } from '@mui/material';
 import { DRAWER_WIDTH } from './Sidebar';
+import useAuth from '../../hooks/useAuth';
 
 const pageTitles = {
   '/': 'Dashboard',
@@ -15,6 +16,7 @@ const pageTitles = {
 
 export default function TopBar() {
   const { pathname } = useLocation();
+  const { user } = useAuth();
   const title = pageTitles[pathname] || 'FreshFlow';
 
   return (
@@ -34,7 +36,7 @@ export default function TopBar() {
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ bgcolor: '#1B5E20', width: 36, height: 36, fontWeight: 600 }}>
-            D
+            {user?.firstName?.charAt(0).toUpperCase() || 'U'}
           </Avatar>
         </Box>
       </Toolbar>

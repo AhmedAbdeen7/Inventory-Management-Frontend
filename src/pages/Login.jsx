@@ -20,17 +20,32 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
+import useAuth from '../hooks/useAuth';
+
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const valid = email.includes('@') && password.length >= 6;
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (valid) {
-      navigate('/dashboard');
+      setLoading(true);
+      setError('');
+      try {
+        await login(email, password);
+        navigate('/');
+      } catch (err) {
+        setError(err.response?.data?.message || 'Login failed');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -113,6 +128,11 @@ export default function Login() {
                 >
                   Log in to manage your inventory and view AI insights.
                 </Typography>
+                {error && (
+                  <Typography color="error" variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+                    {error}
+                  </Typography>
+                )}
               </Box>
 
               <Box component="form" noValidate onSubmit={handleLogin}>

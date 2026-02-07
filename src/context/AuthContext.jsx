@@ -1,31 +1,36 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import useAuth from '../hooks/useAuth';
 import * as authService from '../services/authService';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const { user: demoUser } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    async function init(){
-      try{
+    async function init() {
+      try {
         const profile = await authService.getProfile();
-        if (mounted) setUser(profile);
-      }catch(e){
-        if (mounted) setUser(demoUser);
-      }finally{ if (mounted) setLoading(false); }
+        setUser(profile);
+      } catch (e) {
+        console.error("Failed to load profile", e);
+      } finally {
+        setLoading(false);
+      }
     }
     init();
-    return () => { mounted = false; };
   }, []);
 
   const login = async (email, password) => {
     const res = await authService.login(email, password);
-    setUser(res.user || res);
+    // res should be the user object or contain it
+    setUser(res);
+    return res;
+  };
+
+  const register = async (userData) => {
+    const res = await authService.register(userData);
+    setUser(res);
     return res;
   };
 
@@ -35,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

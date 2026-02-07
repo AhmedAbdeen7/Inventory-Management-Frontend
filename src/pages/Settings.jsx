@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { Grid, Card, CardContent, Typography, Box, TextField, Switch, FormControlLabel, Button, Avatar, Stack, Divider, InputAdornment } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
+import { Grid, Card, CardContent, Typography, Box, TextField, Switch, FormControlLabel, Button, Avatar, Stack, Divider, InputAdornment, MenuItem } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SaveIcon from '@mui/icons-material/Save';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import TuneIcon from '@mui/icons-material/Tune';
+import LogoutIcon from '@mui/icons-material/Logout';
 import PageWrapper from '../components/layout/PageWrapper';
 
 export default function Settings() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/register');
+  };
+
   const [notifications, setNotifications] = useState({
     criticalAlerts: true,
     dailyDigest: true,
@@ -20,6 +31,7 @@ export default function Settings() {
     safetyBuffer: 50,
     lowStockThreshold: 20,
     budgetLimit: '',
+    predictionPeriod: 'weekly',
   });
 
   const handleNotificationChange = (key) => {
@@ -73,11 +85,13 @@ export default function Settings() {
                 mb: 2,
               }}
             >
-              D
+              {user?.firstName?.charAt(0).toUpperCase() || 'U'}
             </Avatar>
-            <Typography variant="h5" fontWeight={700}>Demo Manager</Typography>
+            <Typography variant="h5" fontWeight={700}>
+              {user?.firstName} {user?.lastName}
+            </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              demo@freshflow.dk
+              {user?.email}
             </Typography>
             <Box
               sx={{
@@ -91,7 +105,20 @@ export default function Settings() {
                 fontSize: 14,
               }}
             >
-              Manager
+              {user?.role || 'Owner'}
+            </Box>
+
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<LogoutIcon />}
+                onClick={handleLogout}
+                sx={{ px: 3, borderRadius: 2 }}
+              >
+                Sign Out
+              </Button>
             </Box>
 
             <Divider sx={{ my: 3 }} />
@@ -217,6 +244,20 @@ export default function Settings() {
                   helperText="Prioritise reorders within this budget."
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Default Prediction Time"
+                  value={params.predictionPeriod}
+                  onChange={(e) => handleParamChange('predictionPeriod', e.target.value)}
+                  helperText="Time period for forecasting."
+                >
+                  <MenuItem value="daily">Daily</MenuItem>
+                  <MenuItem value="weekly">Weekly</MenuItem>
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                </TextField>
+              </Grid>
             </Grid>
 
             <Box sx={{ mt: 4, textAlign: 'right' }}>
@@ -232,6 +273,6 @@ export default function Settings() {
           </CardContent>
         </Card>
       </Box>
-    </PageWrapper>
+    </PageWrapper >
   );
 }
