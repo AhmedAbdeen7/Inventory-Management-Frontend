@@ -1,0 +1,38 @@
+{
+    "promotions": [
+        {
+            "id": 1,
+            "name": "Fresh Salad Bundle",
+            "discount": "20% off",
+            "items": [
+                "Lettuce",
+                "Tomatoes",
+                "Mozzarella"
+            ],
+            "metrics": {
+                "wasteSaved": "DKK 1,200",
+                "unitsMoved": "~40 units moved",
+                "marginRetained": "35%"
+            },
+            "reason": "Tomatoes near reorder threshold; Mozzarella slow-moving this week.",
+            "aiExplanation": "Based on current inventory levels and historical sales patterns, bundling these items will reduce waste by 15% while maintaining healthy margins. The promotion targets afternoon shoppers who typically purchase salad ingredients together."
+        },
+        {
+            "id": 2,
+            "name": "Chicken Meal Deal",
+            "discount": "15% off",
+            "items": [
+                "Chicken Breast",
+                "Basil (fresh)"
+            ],
+            "metrics": {
+                "wasteSaved": "DKK 800",
+                "unitsMoved": "~25 units/day",
+                "marginRetained": "40%"
+            },
+            "reason": "Chicken Breast approaching 5-day stock; Basil has high variance.",
+            "aiExplanation": "This bundle leverages the complementary nature of chicken and basil in popular recipes. The AI model predicts a 23% increase in chicken sales with this pairing, helping to normalize stock levels before the next delivery."
+        }
+    ],
+    "suggestionsCount": 2
+}
