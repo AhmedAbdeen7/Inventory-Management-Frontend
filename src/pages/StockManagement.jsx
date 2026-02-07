@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Box, Grid, Card, CardContent, Typography, Button, TextField, InputAdornment, Chip, Table, TableHead, TableRow, TableCell, TableBody, IconButton, LinearProgress, Snackbar, Autocomplete, Dialog, DialogTitle, DialogContent, DialogActions, TablePagination, Avatar, Stack } from '@mui/material';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Box, Grid, Card, CardContent, Typography, Button, TextField, InputAdornment, Chip, Table, TableHead, TableRow, TableCell, TableBody, IconButton, LinearProgress, Snackbar, Autocomplete, Dialog, DialogTitle, DialogContent, DialogActions, TablePagination, Avatar, Stack, CircularProgress } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -13,52 +13,155 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PageWrapper from '../components/layout/PageWrapper';
 import CategoryFilter from '../components/ui/CategoryFilter';
 import mockStock from '../mocks/stockData.json';
-import { stockIn as apiStockIn, orderOut as apiOrderOut } from '../services/inventoryService';
+import { stockIn as apiStockIn, orderOut as apiOrderOut, getMenuItems, getAddons, getStock, getSales, getRestocks, getSettings } from '../services/inventoryService';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 export default function StockManagement() {
-  const [inventory, setInventory] = useState(mockStock.inventory || []);
+  const [inventory, setInventory] = useState([]);
+  const [loadingStock, setLoadingStock] = useState(true);
   const [transactions, setTransactions] = useState(mockStock.recentTransactions || []);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [snack, setSnack] = useState({ open: false, msg: '' });
+  const [settings, setSettings] = useState({ lowStockThreshold: 10 });
+  const [inventoryValue, setInventoryValue] = useState(0);
 
-  const categories = useMemo(() => mockStock.categories || ['All'], []);
+  const categories = useMemo(() => ['All', 'MenuItem', 'Addon'], []);
+
+  useEffect(() => {
+    fetchStock();
+    fetchTransactions();
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const data = await getSettings();
+      setSettings(data);
+    } catch (error) {
+      console.error("Failed to fetch settings", error);
+    }
+  };
+
+  const fetchStock = async () => {
+    setLoadingStock(true);
+    try {
+      const data = await getStock();
+      setInventory(data);
+    } catch (error) {
+      console.error("Failed to fetch stock", error);
+    } finally {
+      setLoadingStock(false);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const [sales, restocks] = await Promise.all([getSales(), getRestocks()]);
+
+      // Calculate Inventory Value
+      // Value = (Sum of all Restocks (qty * pricePerUnit)) - (Sum of all Sales (qty * pricePerUnit))
+      const totalRestockValue = restocks.reduce((acc, r) => acc + (r.quantity * r.pricePerUnit), 0);
+      const totalSaleValue = sales.reduce((acc, s) => acc + (s.quantity * s.pricePerUnit), 0);
+      setInventoryValue(totalRestockValue - totalSaleValue);
+
+      const formattedSales = sales.map(s => ({
+        id: s._id,
+        type: 'stock-out',
+        itemName: s.menuItem ? s.menuItem.title : (s.addons && s.addons.length ? 'Addons' : 'Unknown'),
+        qty: s.quantity,
+        note: 'Sale', // You might want to add a note field to sales later
+        timestamp: s.createdAt
+      }));
+
+      const formattedRestocks = restocks.map(r => ({
+        id: r._id,
+        type: 'stock-in',
+        itemName: r.menuItem ? r.menuItem.title : (r.addons && r.addons.length ? 'Addons' : 'Unknown'),
+        qty: r.quantity,
+        note: 'Restock',
+        timestamp: r.createdAt
+      }));
+
+      const allTransactions = [...formattedSales, ...formattedRestocks].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setTransactions(allTransactions);
+    } catch (error) {
+      console.error("Failed to fetch transactions", error);
+    }
+  };
 
   const totals = useMemo(() => {
     const totalItems = inventory.length;
-    // User requested Total Units to be 312 and Inventory Value format to be DKK 6,583,00
-    return { totalItems: 10, units: 312, lowStock: 0, value: 658300 };
-  }, [inventory]);
+    const units = inventory.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const lowStock = inventory.filter(item => (item.quantity || 0) < (settings.lowStockThreshold || 10)).length;
+    return { totalItems, units, lowStock, value: inventoryValue };
+  }, [inventory, settings, inventoryValue]);
 
-  const filtered = inventory.filter(i =>
-    (category === 'All' || i.category === category) &&
-    i.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const filtered = inventory.filter(i => {
+    const itemName = i.item ? (i.item.title || 'Unknown Item') : 'Unknown Item';
+    return (category === 'All' || i.itemType === category) &&
+      itemName.toLowerCase().includes(query.toLowerCase())
+  });
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const handleChangePage = (e, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (e) => { setRowsPerPage(Number(e.target.value)); setPage(0); };
 
-  const adjust = async (itemId, qty, type, note) => {
-    setInventory((prev) => prev.map(it => it.id === itemId ? { ...it, onHand: Math.max(0, it.onHand + (type === 'in' ? qty : -qty)) } : it));
-    const item = inventory.find(i => i.id === itemId) || {};
-    const tx = { id: Date.now(), itemId, itemName: item.name, type: type === 'in' ? 'stock-in' : 'order-out', qty, note, timestamp: new Date().toISOString(), user: 'Demo' };
-    setTransactions((t) => [tx, ...t].slice(0, 50));
-    setSnack({ open: true, msg: `${type === 'in' ? 'Stocked in' : 'Ordered out'} ${qty} ${item.unit || ''} of ${item.name}` });
+  const adjust = async (item, qty, type, note) => {
+    // Optimistic update
+    setInventory((prev) => prev.map(it => {
+      // Optimistically update if we find the matching item in stock
+      // Note: The backend restock creates a new entry if not found, forcing a re-fetch is safer but we can try optimistic
+      if (it?.item?._id === item._id || it?.item === item._id) {
+        return { ...it, quantity: Math.max(0, (it.quantity || 0) + (type === 'in' ? qty : -qty)) };
+      }
+      return it;
+    }));
+
     try {
-      if (type === 'in') await apiStockIn(itemId, qty, note).catch(() => null);
-      else await apiOrderOut(itemId, qty, note).catch(() => null);
-    } catch (e) { /* ignore */ }
+      if (type === 'in') await apiStockIn(item, qty);
+      else await apiOrderOut(item, qty);
+
+      setSnack({ open: true, msg: `${type === 'in' ? 'Stocked in' : 'Ordered out'} successfully` });
+      fetchStock(); // Refresh stock to get updated values and potentially new rows
+      fetchTransactions(); // Refresh transactions
+    } catch (e) {
+      console.error("Adjustment failed", e);
+      setSnack({ open: true, msg: 'Adjustment failed' });
+      fetchStock(); // Revert/Refresh
+    }
   };
 
   const [dialog, setDialog] = useState({ open: false, type: 'in', item: null, qty: 1, note: '' });
+  const [dialogOptions, setDialogOptions] = useState([]);
+  const [dialogLoading, setDialogLoading] = useState(false);
 
-  const getStatusColor = (onHand, minStock) => {
-    const ratio = onHand / minStock;
-    if (ratio <= 1) return { label: 'Low', color: '#DC2626', bg: '#FEF2F2' };
-    if (ratio <= 1.5) return { label: 'Medium', color: '#F59E0B', bg: '#FFFBEB' };
+  // Debounce search for dialog
+  const handleDialogSearch = async (event, value, reason) => {
+    if (reason === 'input') {
+      setDialogLoading(true);
+      try {
+        const [menuItems, addons] = await Promise.all([
+          getMenuItems(value),
+          getAddons(value)
+        ]);
+        // standardize the format
+        const formattedMenuItems = menuItems.map(i => ({ ...i, type: 'Menu Item', label: `${i.title} - DKK ${i.price}` }));
+        const formattedAddons = addons.map(i => ({ ...i, type: 'Addon', label: `${i.title} - DKK ${i.price}` }));
+        setDialogOptions([...formattedMenuItems, ...formattedAddons]);
+      } catch (error) {
+        console.error("Failed to fetch items", error);
+        setDialogOptions([]);
+      } finally {
+        setDialogLoading(false);
+      }
+    }
+  };
+
+
+  const getStatusColor = (quantity) => {
+    if (quantity < (settings.lowStockThreshold || 10)) return { label: 'Low', color: '#DC2626', bg: '#FEF2F2' };
     return { label: 'Good', color: '#059669', bg: '#F0FDF4' };
   };
 
@@ -179,7 +282,7 @@ export default function StockManagement() {
             </Avatar>
             <Box>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>Inventory Value</Typography>
-              <Typography variant="h5" fontWeight={800} color="#111827">DKK 6,583,00</Typography>
+              <Typography variant="h5" fontWeight={800} color="#111827">DKK {totals.value.toFixed(2)}</Typography>
             </Box>
           </CardContent>
         </Card>
@@ -215,7 +318,7 @@ export default function StockManagement() {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={2}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #f3f4f6', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardContent sx={{ p: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ p: 3, borderBottom: '1px solid #f3f4f6' }}>
@@ -235,18 +338,35 @@ export default function StockManagement() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((it) => {
-                      const status = getStatusColor(it.onHand, it.minStock);
-                      const progressValue = Math.min(100, (it.onHand / it.minStock) * 50);
+                    {loadingStock ? (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                          <CircularProgress size={30} />
+                        </TableCell>
+                      </TableRow>
+                    ) : filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                      const item = row.item || {};
+                      const itemName = item.title || 'Unknown Item #' + item;
+                      const quantity = row.quantity || 0;
+                      // Determine unit based on type or data? default to 'unit'
+                      const unit = 'units';
+                      const minStock = settings.lowStockThreshold || 10;
+
+                      const status = getStatusColor(quantity);
+                      const progressValue = Math.min(100, (quantity / minStock) * 50);
+
+                      // We need a stable ID for key. Stock ID is best.
+                      const key = row._id || (item._id + row.itemType);
+
                       return (
-                        <TableRow key={it.id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                        <TableRow key={key} hover sx={{ '&:last-child td': { border: 0 } }}>
                           <TableCell sx={{ py: 2.5 }}>
-                            <Typography fontWeight={700} color="#111827" sx={{ fontSize: 15 }}>{it.name}</Typography>
-                            <Typography variant="caption" color="#6B7280">{it.category} · {it.unit}</Typography>
+                            <Typography fontWeight={700} color="#111827" sx={{ fontSize: 15 }}>{itemName}</Typography>
+                            <Typography variant="caption" color="#6B7280">{row.itemType}</Typography>
                           </TableCell>
                           <TableCell sx={{ py: 2.5 }}>
                             <Box sx={{ width: 140 }}>
-                              <Typography sx={{ color: '#111827', fontWeight: 700, mb: 0.5 }}>{it.onHand}</Typography>
+                              <Typography sx={{ color: '#111827', fontWeight: 700, mb: 0.5 }}>{quantity}</Typography>
                               <LinearProgress
                                 variant="determinate"
                                 value={progressValue}
@@ -259,7 +379,7 @@ export default function StockManagement() {
                               />
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ py: 2.5, fontWeight: 500, color: '#374151' }}>{it.minStock}</TableCell>
+                          <TableCell sx={{ py: 2.5, fontWeight: 500, color: '#374151' }}>{minStock}</TableCell>
                           <TableCell sx={{ py: 2.5 }}>
                             <Chip
                               label={status.label}
@@ -277,14 +397,14 @@ export default function StockManagement() {
                             <Stack direction="row" spacing={1} justifyContent="flex-end">
                               <IconButton
                                 size="small"
-                                onClick={() => adjust(it.id, 1, 'in', 'Manual +')}
+                                onClick={() => adjust(item, 1, 'in', 'Manual +')}
                                 sx={{ bgcolor: '#F0FDF4', color: '#059669', '&:hover': { bgcolor: '#DCFCE7' } }}
                               >
                                 <AddIcon fontSize="small" />
                               </IconButton>
                               <IconButton
                                 size="small"
-                                onClick={() => adjust(it.id, 1, 'out', 'Manual -')}
+                                onClick={() => adjust(item, 1, 'out', 'Manual -')}
                                 sx={{ bgcolor: '#FEF2F2', color: '#DC2626', '&:hover': { bgcolor: '#FEE2E2' } }}
                               >
                                 <RemoveIcon fontSize="small" />
@@ -311,7 +431,7 @@ export default function StockManagement() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md>
+        <Grid item xs={12} md={6}>
           <Card sx={{ boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #f3f4f6', height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
@@ -364,11 +484,29 @@ export default function StockManagement() {
         <DialogTitle sx={{ fontWeight: 800 }}>{dialog.type === 'in' ? 'Stock In' : 'Order Out'}</DialogTitle>
         <DialogContent>
           <Autocomplete
-            options={inventory}
-            getOptionLabel={(o) => o.name}
+            options={dialogOptions}
+            getOptionLabel={(o) => o.label || o.title || ''}
             value={dialog.item}
             onChange={(e, v) => setDialog(d => ({ ...d, item: v }))}
-            renderInput={(params) => (<TextField {...params} label="Select Item" margin="normal" fullWidth />)}
+            onInputChange={handleDialogSearch}
+            loading={dialogLoading}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Select Item"
+                margin="normal"
+                fullWidth
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <React.Fragment>
+                      {dialogLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </React.Fragment>
+                  ),
+                }}
+              />
+            )}
             sx={{ mt: 2 }}
           />
           <TextField
@@ -395,7 +533,8 @@ export default function StockManagement() {
             variant="contained"
             onClick={() => {
               if (!dialog.item) return setSnack({ open: true, msg: 'Please select an item' });
-              adjust(dialog.item.id, dialog.qty || 1, dialog.type, dialog.note || '');
+              // Use full item object for the API
+              adjust(dialog.item, dialog.qty || 1, dialog.type, dialog.note || '');
               setDialog({ ...dialog, open: false });
             }}
             sx={{ bgcolor: '#2563eb', fontWeight: 700, '&:hover': { bgcolor: '#1d4ed8' } }}
