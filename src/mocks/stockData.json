@@ -1,0 +1,164 @@
+{
+  "inventory": [
+    {
+      "id": 1,
+      "name": "Tomatoes",
+      "category": "Produce",
+      "unit": "kg",
+      "onHand": 20,
+      "minStock": 15,
+      "costPerUnit": 12.5,
+      "lastUpdated": "2026-02-06T09:15:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Mozzarella",
+      "category": "Dairy",
+      "unit": "pcs",
+      "onHand": 15,
+      "minStock": 10,
+      "costPerUnit": 28,
+      "lastUpdated": "2026-02-06T08:40:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Chicken Breast",
+      "category": "Protein",
+      "unit": "kg",
+      "onHand": 40,
+      "minStock": 25,
+      "costPerUnit": 45,
+      "lastUpdated": "2026-02-06T08:00:00Z"
+    },
+    {
+      "id": 4,
+      "name": "Olive Oil (5L)",
+      "category": "Pantry",
+      "unit": "bottles",
+      "onHand": 8,
+      "minStock": 5,
+      "costPerUnit": 120,
+      "lastUpdated": "2026-02-05T14:30:00Z"
+    },
+    {
+      "id": 5,
+      "name": "Lettuce",
+      "category": "Produce",
+      "unit": "heads",
+      "onHand": 60,
+      "minStock": 30,
+      "costPerUnit": 8,
+      "lastUpdated": "2026-02-06T07:45:00Z"
+    },
+    {
+      "id": 6,
+      "name": "Basil (fresh)",
+      "category": "Produce",
+      "unit": "bunches",
+      "onHand": 25,
+      "minStock": 15,
+      "costPerUnit": 15,
+      "lastUpdated": "2026-02-06T07:30:00Z"
+    },
+    {
+      "id": 7,
+      "name": "Bread Rolls",
+      "category": "Bakery",
+      "unit": "pcs",
+      "onHand": 80,
+      "minStock": 50,
+      "costPerUnit": 5,
+      "lastUpdated": "2026-02-06T06:00:00Z"
+    },
+    {
+      "id": 8,
+      "name": "Salmon Fillet",
+      "category": "Protein",
+      "unit": "kg",
+      "onHand": 12,
+      "minStock": 8,
+      "costPerUnit": 180,
+      "lastUpdated": "2026-02-05T16:00:00Z"
+    },
+    {
+      "id": 9,
+      "name": "Lemon",
+      "category": "Produce",
+      "unit": "pcs",
+      "onHand": 45,
+      "minStock": 20,
+      "costPerUnit": 3,
+      "lastUpdated": "2026-02-06T07:00:00Z"
+    },
+    {
+      "id": 10,
+      "name": "Eggs",
+      "category": "Dairy",
+      "unit": "trays",
+      "onHand": 18,
+      "minStock": 10,
+      "costPerUnit": 35,
+      "lastUpdated": "2026-02-06T06:30:00Z"
+    }
+  ],
+  "recentTransactions": [
+    {
+      "id": 101,
+      "itemId": 1,
+      "itemName": "Tomatoes",
+      "type": "stock-in",
+      "qty": 50,
+      "note": "Morning delivery – supplier Grønt ApS",
+      "timestamp": "2026-02-06T09:30:00Z",
+      "user": "Ahmed A."
+    },
+    {
+      "id": 102,
+      "itemId": 7,
+      "itemName": "Bread Rolls",
+      "type": "stock-in",
+      "qty": 120,
+      "note": "Bakery delivery",
+      "timestamp": "2026-02-06T08:15:00Z",
+      "user": "Ahmed A."
+    },
+    {
+      "id": 103,
+      "itemId": 1,
+      "itemName": "Tomatoes",
+      "type": "order-out",
+      "qty": 8,
+      "note": "Kitchen order",
+      "timestamp": "2026-02-06T10:00:00Z",
+      "user": "Kitchen"
+    },
+    {
+      "id": 104,
+      "itemId": 2,
+      "itemName": "Mozzarella",
+      "type": "order-out",
+      "qty": 5,
+      "note": "Kitchen order",
+      "timestamp": "2026-02-06T09:45:00Z",
+      "user": "Kitchen"
+    },
+    {
+      "id": 105,
+      "itemId": 5,
+      "itemName": "Lettuce",
+      "type": "stock-in",
+      "qty": 30,
+      "note": "Morning delivery",
+      "timestamp": "2026-02-06T07:45:00Z",
+      "user": "Ahmed A."
+    }
+  ],
+  "categories": [
+    "All",
+    "Produce",
+    "Dairy",
+    "Protein",
+    "Pantry",
+    "Bakery"
+  ]
+}
